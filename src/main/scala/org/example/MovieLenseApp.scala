@@ -43,31 +43,32 @@ object MovieLenseApp {
       )
     )
 
-    val movies_df = spark.read.format("csv").schema(moviesSchema).option("sep", separator).load(moviesDataPath);
+    val moviesDF = spark.read.format("csv").schema(moviesSchema).option("sep", separator).load(moviesDataPath);
+    println("Base Movies Data")
+    moviesDF.show()
 
-    movies_df.show()
+    val ratingsDF = spark.read.format("csv").schema(ratingsSchema).option("sep", separator).load(ratingsDataPath);
 
-    val ratings_df = spark.read.format("csv").schema(ratingsSchema).option("sep", separator).load(ratingsDataPath);
+    println("Base Ratings Data")
+    ratingsDF.show()
 
-    ratings_df.show()
-
-    val ratings_min_max_df = ratings_df.groupBy("MovieID").
+    val movieRatingsDF = ratingsDF.groupBy("MovieID").
       agg(
         min("Rating").as("min_rating"),
         max("Rating").as("max_rating"),
         avg("Rating").as("avg_rating")
       )
 
-    ratings_min_max_df.show()
+    println("Movies Data with Min, Max and Average ratings")
+    movieRatingsDF.show()
 
-    val joined_df = movies_df.join(ratings_min_max_df, movies_df("MovieID") === ratings_min_max_df("MovieID"))
-    joined_df.show()
 
     val ratingsByUserSpec = Window.partitionBy("UserID").orderBy(desc("Rating"))
     val rowNumberColumn = "row_number"
-    val user_top_ratings_df = ratings_df.withColumn(rowNumberColumn, row_number().over(ratingsByUserSpec)).
+    val userTopRatingsDF = ratingsDF.withColumn(rowNumberColumn, row_number().over(ratingsByUserSpec)).
       filter(s"$rowNumberColumn <= $topRecords")
 
-    user_top_ratings_df.show()
+    println(s"Top rated($topRecords) Movies for User")
+    userTopRatingsDF.show()
   }
 }
