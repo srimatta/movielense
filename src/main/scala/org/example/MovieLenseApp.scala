@@ -9,9 +9,6 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.sql.functions._
 
-
-
-
 object MovieLenseApp {
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
@@ -46,12 +43,11 @@ object MovieLenseApp {
       )
     )
 
-   val movies_df = spark.read.format("csv").schema(moviesSchema).option("sep", separator).load(moviesDataPath);
+    val movies_df = spark.read.format("csv").schema(moviesSchema).option("sep", separator).load(moviesDataPath);
 
     movies_df.show()
 
     val ratings_df = spark.read.format("csv").schema(ratingsSchema).option("sep", separator).load(ratingsDataPath);
-
 
     ratings_df.show()
 
@@ -65,15 +61,13 @@ object MovieLenseApp {
     ratings_min_max_df.show()
 
     val joined_df = movies_df.join(ratings_min_max_df, movies_df("MovieID") === ratings_min_max_df("MovieID"))
-
     joined_df.show()
 
-    val userRatingSpec = Window.partitionBy("UserID").orderBy(desc("Rating"))
+    val ratingsByUserSpec = Window.partitionBy("UserID").orderBy(desc("Rating"))
+    val rowNumberColumn = "row_number"
+    val user_top_ratings_df = ratings_df.withColumn(rowNumberColumn, row_number().over(ratingsByUserSpec)).
+      filter(s"$rowNumberColumn <= $topRecords")
 
-
-    val user_top_3_df = ratings_df.withColumn("row_number", row_number().over(userRatingSpec)).filter(s"row_number <= $topRecords")
-
-
-    user_top_3_df.show()
+    user_top_ratings_df.show()
   }
 }
