@@ -21,6 +21,7 @@ object MovieLenseApp {
 
     val moviesDataPath = config.getString("moviesDataPath")
     val ratingsDataPath = config.getString("ratingsDataPath")
+    val dataFormat = config.getString("dataFormat")
     val separator = config.getString("separator")
 
     val spark = SparkSession.builder().master(master).appName(appName)
@@ -43,11 +44,11 @@ object MovieLenseApp {
       )
     )
 
-    val moviesDF = spark.read.format("csv").schema(moviesSchema).option("sep", separator).load(moviesDataPath);
+    val moviesDF = spark.read.format(dataFormat).schema(moviesSchema).option("sep", separator).load(moviesDataPath);
     println("Base Movies Data")
     moviesDF.show()
 
-    val ratingsDF = spark.read.format("csv").schema(ratingsSchema).option("sep", separator).load(ratingsDataPath);
+    val ratingsDF = spark.read.format(dataFormat).schema(ratingsSchema).option("sep", separator).load(ratingsDataPath);
 
     println("Base Ratings Data")
     ratingsDF.show()
