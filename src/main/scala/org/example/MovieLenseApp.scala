@@ -24,7 +24,9 @@ object MovieLenseApp {
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
 
-    val config = ConfigFactory.parseFile(new File("application.conf")).getConfig("movierelense")
+    val configFilePath = "application.conf"
+
+    val config = ConfigFactory.parseFile(new File(configFilePath)).getConfig("movielense")
 
     val master = config.getString("master")
     val appName = config.getString("appName")
