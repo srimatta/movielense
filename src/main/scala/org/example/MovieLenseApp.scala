@@ -4,22 +4,15 @@ import java.io.File
 
 import com.typesafe.config.ConfigFactory
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.SparkSession
 
+/**
+ * MovieLenseApp is the EntryPoint for the Application.
+ * Calculates the Minimum, Maximum and Average Ratings for the given Movies
+ * And Also calculates the Top rated movies for the User.
+ * */
 
 object MovieLenseApp {
-
-
-  def printOptionDataFrame(optDF : Option[DataFrame], msg : String = ""): Unit = {
-    optDF match {
-      case Some(df) =>
-        println(msg)
-        df.show()
-      case None => println("Nothing to show.")
-    }
-  }
-
 
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
@@ -30,33 +23,29 @@ object MovieLenseApp {
 
     val master = config.getString("master")
     val appName = config.getString("appName")
-    val topRecords = config.getInt("topRecords")
+    val topRatedMovies = config.getInt("topRatedMovies")
 
-    val moviesDataPath = config.getString("moviesDataPath")
-    val ratingsDataPath = config.getString("ratingsDataPath")
-    val dataFormat = config.getString("dataFormat")
-    val separator = config.getString("separator")
+    val movieConfig = config.getConfig("movies")
+    val ratingsConfig = config.getConfig("ratings")
 
     val spark = SparkSession.builder().master(master).appName(appName)
       .getOrCreate()
 
-    val moviesSchema = SchemaObjects.moviesSchema
-    val ratingsSchema = SchemaObjects.ratingsSchema
 
-    val moviesDF = spark.read.format(dataFormat).schema(moviesSchema).option("sep", separator).load(moviesDataPath)
-    println("Base Movies Data")
+    val moviesDF = MovieLenseData.getDataFrame(spark, movieConfig, SchemaObjects.moviesSchema, MovieLenseUtils.getMovieDataConditionExpr())
+    println("Movies Data")
     moviesDF.show()
 
-    val ratingsDF = spark.read.format(dataFormat).schema(ratingsSchema).option("sep", separator).load(ratingsDataPath)
 
-    println("Base Ratings Data")
+    val ratingsDF = MovieLenseData.getDataFrame(spark, ratingsConfig, SchemaObjects.ratingsSchema, MovieLenseUtils.getRatingsDataConditionExpr())
+    println("Ratings Data")
     ratingsDF.show()
 
     val moviesWithRatingsDF = MovieLenseEngine.getMovieMinMaxAvgRatings(moviesDF, ratingsDF)
-    printOptionDataFrame(moviesWithRatingsDF, "Movies with Min, Max ,Average Ratings")
+    MovieLenseUtils.printOptionDataFrame(moviesWithRatingsDF, "Movies with Min, Max ,Average Ratings")
 
-    val userTopRatingsDF = MovieLenseEngine.getUserTopRatedMovies(moviesDF, ratingsDF, topRecords)
-    printOptionDataFrame(userTopRatingsDF, s"User $topRecords Top rated movies ")
+    val userTopRatingsDF = MovieLenseEngine.getUserTopRatedMovies(moviesDF, ratingsDF, topRatedMovies)
+    MovieLenseUtils.printOptionDataFrame(userTopRatingsDF, s"User $topRatedMovies Top rated movies ")
 
   }
 }

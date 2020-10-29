@@ -6,6 +6,10 @@ import org.apache.spark.sql.functions.{avg, desc, max, min, row_number}
 import org.example.MovieLenseConstants.{movieIDColumn, ratingsColumn, userIDColumn}
 
 object MovieLenseEngine {
+
+  /*
+   getMovieMinMaxAvgRatings returns the optional Dataframe with Min, Max and Average Movie ratings.
+   */
   def getMovieMinMaxAvgRatings(moviesDF: DataFrame, ratingsDF: DataFrame):Option[DataFrame] = {
     println("calculating Movie Min, Max, Avg, Ratings")
 
@@ -29,7 +33,10 @@ object MovieLenseEngine {
     }
   }
 
-  def getUserTopRatedMovies(moviesDF: DataFrame, ratingsDF: DataFrame, topRecords: Int) = {
+  /**
+   * getUserTopRatedMovies returns optional Top Rated Movies Dataframe for the User
+   * */
+  def getUserTopRatedMovies(moviesDF: DataFrame, ratingsDF: DataFrame, topRecords: Int):Option[DataFrame] = {
     println("calculating User top rated movies")
 
     if(!moviesDF.columns.contains(movieIDColumn)) {
