@@ -1,9 +1,9 @@
-# movielense
+# Movielense
 
 MovieLense Application calculates the minimum, maximum and average ratings for the given movies 
 and also calculates the top rated movies by the user. 
 
-####Generating Uber Jar
+#### Generating Uber Jar
 
 `sbt  assembly` will generate 'movielense-assembly-1.0.jar' under 'target/scala-2.12' folder
 
@@ -29,13 +29,12 @@ movielense {
 }
 ```
 
-####Running Application
+#### Running Application
 
 Spark submit command :  
 
-make sure `application.conf` in same folder.
-
-spark-submit target/scala-2.12/movielense-assembly-1.0.jar --class org.example.MovieLenseApp  will generate the results like below.
+`spark-submit target/scala-2.12/movielense-assembly-1.0.jar --files application.conf  --class org.example.MovieLenseApp`
+  will generate the results like below.
 
 
 ```
