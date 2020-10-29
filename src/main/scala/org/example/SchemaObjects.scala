@@ -4,19 +4,19 @@ import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructT
 
 object SchemaObjects {
 
-  val moviesSchema = StructType(
+  val moviesSchema: StructType = StructType(
     List(
-      StructField("MovieID", IntegerType, true),
+      StructField("MovieID", IntegerType, false),
       StructField("Title", StringType, true),
       StructField("Genres", StringType, true)
     )
   )
 
-  val ratingsSchema = StructType(
+  val ratingsSchema: StructType = StructType(
     List(
-      StructField("UserID", IntegerType, true),
-      StructField("MovieID", IntegerType, true),
-      StructField("Rating", IntegerType, true),
+      StructField("UserID", IntegerType, false),
+      StructField("MovieID", IntegerType, false),
+      StructField("Rating", IntegerType, false),
       StructField("Timestamp", IntegerType, true)
     )
   )
